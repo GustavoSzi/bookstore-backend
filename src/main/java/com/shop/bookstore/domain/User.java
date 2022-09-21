@@ -29,6 +29,11 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders = new ArrayList<>();
+
+    //private List<Reviews> reviews = new ArrayList();
+
     public User() {}
 
     public User(Long id, String firstName, String lastName, String email) {
@@ -76,6 +81,10 @@ public class User implements Serializable {
 
     public List<Address> getAddresses() {
         return addresses;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
     }
 
     @Override

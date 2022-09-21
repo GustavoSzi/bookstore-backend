@@ -1,16 +1,13 @@
 package com.shop.bookstore.services;
 
-import com.shop.bookstore.domain.Address;
-import com.shop.bookstore.domain.City;
-import com.shop.bookstore.domain.State;
-import com.shop.bookstore.domain.User;
-import com.shop.bookstore.repositories.AddressRepository;
-import com.shop.bookstore.repositories.CityRepository;
-import com.shop.bookstore.repositories.StateRepository;
-import com.shop.bookstore.repositories.UserRepository;
+import com.shop.bookstore.domain.*;
+import com.shop.bookstore.domain.enums.PaymentStatus;
+import com.shop.bookstore.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 @Service
@@ -24,8 +21,16 @@ public class DBService {
     private UserRepository userRepository;
     @Autowired
     private AddressRepository addressRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
-    public void instantiateTestDatabase() {
+    public void instantiateTestDatabase() throws ParseException {
+
+        //Date formatter
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
         State st1 = new State(null, "São Paulo");
         State st2 = new State(null, "Rio de Janeiro");
         State st3 = new State(null, "Acre");
@@ -72,5 +77,19 @@ public class DBService {
         userRepository.saveAll(Arrays.asList(u1, u2, u3));
         addressRepository.saveAll(Arrays.asList(ad1, ad2, ad3, ad4, ad5));
 
+        Order ord1 = new Order(null, sdf.parse("18/08/2022 10:32"), u1, ad1);
+        Order ord2 = new Order(null, sdf.parse("19/09/2022 12:01"), u3, ad4);
+
+        Payment pay1 = new PaymentWithBoleto(null, PaymentStatus.PAID, ord1, sdf.parse("20/08/2022 11:34"), sdf.parse("24/08/2022 23:59"));
+        ord1.setPayment(pay1);
+
+        Payment pay2 = new PaymentWithCreditCard(null, PaymentStatus.PENDING, ord2, 3);
+        ord2.setPayment(pay2);
+
+        u1.getOrders().add(ord1);
+        u3.getOrders().add(ord2);
+
+        orderRepository.saveAll(Arrays.asList(ord1, ord2));
+        paymentRepository.saveAll(Arrays.asList(pay1, pay2));
     }
 }
