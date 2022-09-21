@@ -25,11 +25,51 @@ public class DBService {
     private OrderRepository orderRepository;
     @Autowired
     private PaymentRepository paymentRepository;
+    @Autowired
+    private BookRepository bookRepository;
+    @Autowired
+    private GenreRepository genreRepository;
+    @Autowired
+    private AuthorRepository authorRepository;
 
     public void instantiateTestDatabase() throws ParseException {
-
         //Date formatter
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        SimpleDateFormat fullDateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        SimpleDateFormat birthDateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+
+        Genre genre1 = new Genre(null, "Fantasy");
+        Genre genre2 = new Genre(null, "Thriller");
+        Genre genre3 = new Genre(null, "Drama");
+        Genre genre4 = new Genre(null, "Horror");
+
+        genreRepository.saveAll(Arrays.asList(genre1, genre2, genre3, genre4));
+
+        Author author1 = new Author(null, "Stephen King", birthDateFormatter.parse("21/09/1947"));
+        Author author2 = new Author(null, "Stephenie Meyer", birthDateFormatter.parse("24/12/1973"));
+        Author author3 = new Author(null, "J.K. Rowling", birthDateFormatter.parse("31/12/1965"));
+
+        authorRepository.saveAll(Arrays.asList(author1, author2, author3));
+
+        Book book1 = new Book(null, "Harry Potter and the Sorcerer's Stone", 25.99,
+                "Harry Potter thinks he is an ordinary boy - until he is rescued by a beetle-eyed giant of a man, enrols at Hogwarts School of Witchcraft and Wizardry, learns to play Quidditch and does battle in a deadly duel. The reason: Harry Potter is a wizard!",
+                309, 2003, author3);
+        book1.getGenres().add(genre1);
+
+        Book book2 = new Book(null, "Twilight", 18.95,
+                "On the first day of her school, Bella sits next to Edward in biology class, but he seems to be utterly repulsed by her, much to her bewilderment. He disappears for a few days but when he returns, he is unexpectedly friendly to Bella.",
+                498, 2005, author2);
+        book2.getGenres().addAll(Arrays.asList(genre1, genre3));
+
+        Book book3 = new Book(null, "It", 44.90,
+                "IT tells the story of seven friends who face an evil shape shifting entity that feeds on the fears of children. One of IT’s favorite disguises is a circus clown called Pennywise, otherwise known as 'Bob Gray'.",
+                1138, 1986, author1);
+        book3.getGenres().add(genre4);
+
+        bookRepository.saveAll(Arrays.asList(book1, book2, book3));
+
+        author1.getBooks().add(book3);
+        author2.getBooks().add(book2);
+        author3.getBooks().add(book1);
 
         State st1 = new State(null, "São Paulo");
         State st2 = new State(null, "Rio de Janeiro");
@@ -77,10 +117,10 @@ public class DBService {
         userRepository.saveAll(Arrays.asList(u1, u2, u3));
         addressRepository.saveAll(Arrays.asList(ad1, ad2, ad3, ad4, ad5));
 
-        Order ord1 = new Order(null, sdf.parse("18/08/2022 10:32"), u1, ad1);
-        Order ord2 = new Order(null, sdf.parse("19/09/2022 12:01"), u3, ad4);
+        Order ord1 = new Order(null, fullDateFormatter.parse("18/08/2022 10:32"), u1, ad1);
+        Order ord2 = new Order(null, fullDateFormatter.parse("19/09/2022 12:01"), u3, ad4);
 
-        Payment pay1 = new PaymentWithBoleto(null, PaymentStatus.PAID, ord1, sdf.parse("20/08/2022 11:34"), sdf.parse("24/08/2022 23:59"));
+        Payment pay1 = new PaymentWithBoleto(null, PaymentStatus.PAID, ord1, fullDateFormatter.parse("20/08/2022 11:34"), fullDateFormatter.parse("24/08/2022 23:59"));
         ord1.setPayment(pay1);
 
         Payment pay2 = new PaymentWithCreditCard(null, PaymentStatus.PENDING, ord2, 3);

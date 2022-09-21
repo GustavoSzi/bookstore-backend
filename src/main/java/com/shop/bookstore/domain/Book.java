@@ -1,12 +1,11 @@
 package com.shop.bookstore.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 public class Book implements Serializable {
@@ -20,19 +19,37 @@ public class Book implements Serializable {
     private Double price;
     private String description;
     private Integer numOfPages;
-    //private Author author;
+    private Integer releaseDate;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Author author;
     //private Editor editor;
-    //private List<Genre> genres = new ArrayList()<>;
+
+    @ManyToMany
+    @JoinTable(
+            name = "book_genres",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres = new HashSet<>();
+
     //private List<Review> reviews = new ArrayList()<>;
+
+    @OneToMany(mappedBy = "id.book")
+    private Set<OrderItem> items = new HashSet<>();
 
     public Book() {}
 
-    public Book(Long id, String name, Double price, String description, Integer numOfPages) {
+    public Book(Long id, String name, Double price, String description, Integer numOfPages,
+                Integer releaseDate, Author author) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.numOfPages = numOfPages;
+        this.releaseDate = releaseDate;
+        this.author = author;
     }
 
     public Long getId() {
@@ -73,6 +90,47 @@ public class Book implements Serializable {
 
     public void setNumOfPages(Integer numOfPages) {
         this.numOfPages = numOfPages;
+    }
+
+    @JsonIgnore
+    public List<Order> getOrders() {
+        List<Order> orders = new ArrayList<>();
+        for(OrderItem i : items) {
+            orders.add(i.getOrder());
+        }
+        return orders;
+    }
+
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = genres;
+    }
+
+    public Set<OrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(Set<OrderItem> items) {
+        this.items = items;
+    }
+
+    public Integer getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Integer releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public Author getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
     @Override
